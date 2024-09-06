@@ -10,16 +10,21 @@ import Loader from "@components/Loader";
 
 const LeftSideBar = () => {
   const { user, isLoaded } = useUser();
-
   const [loading, setLoading] = useState(true);
-
   const [userData, setUserData] = useState({});
 
   const getUser = async () => {
-    const response = await fetch(`/api/user/${user.id}`);
-    const data = await response.json();
-    setUserData(data);
-    setLoading(false);
+    try {
+      const response = await fetch(`/api/user/${user.id}`);
+      if (!response.ok) throw new Error('Error fetching user data');
+      const data = await response.json();
+      setUserData(data);
+    } catch (error) {
+      console.error(error);
+      // Manejo de errores
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -38,30 +43,32 @@ const LeftSideBar = () => {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-2 items-center text-light-1">
-          <Link href={`/profile/${userData._id}/posts`}>
-            <Image
-              src={userData?.profilePhoto}
-              alt="profile photo"
-              width={50}
-              height={50}
-              className="rounded-full"
-            />
-          </Link>
+          {userData?._id && (
+            <Link href={`/profile/${userData._id}/posts`}>
+              <Image
+                src={userData?.profilePhoto || '/default-profile.png'}
+                alt="profile photo"
+                width={50}
+                height={50}
+                className="rounded-full"
+              />
+            </Link>
+          )}
           <p className="text-small-bold">
             {userData?.firstName} {userData?.lastName}
           </p>
         </div>
         <div className="flex text-light-1 justify-between">
           <div className="flex flex-col items-center">
-            <p className="text-base-bold">{userData?.posts?.length}</p>
+            <p className="text-base-bold">{userData?.posts?.length || 0}</p>
             <p className="text-tiny-medium">Posts</p>
           </div>
           <div className="flex flex-col items-center">
-            <p className="text-base-bold">{userData?.followers?.length}</p>
+            <p className="text-base-bold">{userData?.followers?.length || 0}</p>
             <p className="text-tiny-medium">Followers</p>
           </div>
           <div className="flex flex-col items-center">
-            <p className="text-base-bold">{userData?.following?.length}</p>
+            <p className="text-base-bold">{userData?.following?.length || 0}</p>
             <p className="text-tiny-medium">Following</p>
           </div>
         </div>

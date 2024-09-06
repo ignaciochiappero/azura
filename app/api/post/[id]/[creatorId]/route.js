@@ -6,8 +6,10 @@ export const DELETE = async (req, { params }) => {
   try {
     await connectToDB();
 
+    // Elimina la publicación
     await Post.findByIdAndDelete(params.id);
 
+    // Actualiza al usuario eliminando la publicación de su lista
     const user = await User.findByIdAndUpdate(
       params.creatorId,
       { $pull: { posts: params.id } },
